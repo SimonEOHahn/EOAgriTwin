@@ -73,7 +73,32 @@ for (station in stations) {
   process_icos_station(station)
 }
 
+
+#####################Process ECOSTRESS data###########################
+setwd("D:/EOAgriTwin/Evapotranspiration/ECOSTRESS")
+# List of CSV files (assuming they are named consistently)
+years <- 2018:2022
+file_names <- paste0("FLUX-ECOSTRESS-", years, "-ECO3ETPTJPL-001-results.csv")
+
+# Read and combine all data
+data_list <- lapply(file_names, read.csv)
+data <- bind_rows(data_list)
+
+# Rename column for easier access
+colnames(data)[colnames(data) == "ECO3ETPTJPL_001_EVAPOTRANSPIRATION_PT_JPL_ETdaily"] <- "ETdaily"
+
+# List of stations to extract
+stations <- c("DE-Geb", "DE-Gri", "DE-Kli", "DE-RuR", "DE-RuS")
+
+# Loop through stations and save each as a separate CSV file
+for (station in stations) {
+  station_data <- data %>% filter(ID == station) %>% select(Date, ETdaily)
+  write.csv(station_data, paste0(station, "_ETdaily_2018-2022.csv"), row.names = FALSE)
+}
+
+
 ############Combine ICOS Reference and ECOSTRESS data#################
+setwd("D:/EOAgriTwin/Evapotranspiration")
 
 # Define function to merge and process data for one station
 process_station_data <- function(station) {
